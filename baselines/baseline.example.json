@@ -1,0 +1,9 @@
+{
+  "groundedness": 0.972,
+  "faithfulness": 0.941,
+  "retrieval_hit_rate": 0.908,
+  "refusal_accuracy": 1.0,
+  "p95_latency_s": 2.31,
+  "n_cases": 8,
+  "commit": "a1b2c3d"
+}

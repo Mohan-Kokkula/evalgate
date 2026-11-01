@@ -1,0 +1,43 @@
+name: eval-gate
+
+on:
+  pull_request:
+    paths:
+      - "prompts/**"
+      - "src/**"
+      - "datasets/**"
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install
+        run: pip install -e ".[dev]"
+
+      - name: Unit tests
+        run: pytest -q
+
+      # The gate runs against the real system with a real judge. It is the
+      # step that blocks the merge, so it needs the same credentials the
+      # service uses in staging.
+      - name: Evaluation gate
+        env:
+          MODEL_API_KEY: ${{ secrets.MODEL_API_KEY }}
+        run: |
+          python examples/run_eval.py \
+            --golden datasets/golden.jsonl \
+            --baseline baselines/baseline.json \
+            --out results/summary.json
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-results
+          path: results/
